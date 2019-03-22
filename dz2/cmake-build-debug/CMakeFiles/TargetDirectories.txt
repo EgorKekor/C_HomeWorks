@@ -1,0 +1,3 @@
+/home/kekor/CLionProjects/C/dz2/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/kekor/CLionProjects/C/dz2/cmake-build-debug/CMakeFiles/dz2.dir
+/home/kekor/CLionProjects/C/dz2/cmake-build-debug/CMakeFiles/edit_cache.dir
