@@ -6,10 +6,9 @@
 #define     TRUE                1
 #define     FALSE               0
 #define     START_VAR_AMOUNT    1
-#define     START_VAR_LENGHT    2
-#define     START_EXPR_LENGHT   100
+#define     START_VAR_LENGHT    10
+#define     START_EXPR_LENGHT   20
 #define     STACK_SIZE          100
-#define     MAX_VAR_LEN         50
 #define     TOKEN_AMOUNT        4
 
 typedef char Bool;
@@ -167,7 +166,7 @@ Bool get_var(char* buf, var* v, char opers[][sizeof("and")]) {
 int compare_vars(char* word, var** varriables, size_t var_numb) {
     for (size_t v = 0; v < var_numb; v++) {
         if (!strncmp(word, varriables[v]->name, varriables[v]->len)) {
-            return v;                               //  Вернем номер переменной
+            return v;
         }
     }
     return -1;
@@ -270,7 +269,7 @@ var** add_vars(var** v, size_t current_amount, size_t add_amount) {
 
 // ================================
 
-Bool get_expr(char *buf, char *expr, var** varriables, size_t var_numb) {
+Bool get_expr(char *buf, char **expr, size_t *e_len, var** varriables, size_t var_numb) {
     char* word = NULL;
     if ((word = (char*)calloc(strlen(buf), sizeof(char))) == NULL) {
         return FALSE;
@@ -290,41 +289,51 @@ Bool get_expr(char *buf, char *expr, var** varriables, size_t var_numb) {
             word[pos + 1] = '\0';
             pos++;
         } else {
+            if (element_position >= *e_len - 3) {
+                *e_len *= 2;
+                char *check = NULL;
+                if ((check = increase_string(expr[0], *e_len)) == NULL) {
+                    return FALSE;
+                } else {
+                    expr[0] = check;
+                }
+            }
+
             if (pos > 0) {
                 int find = -1;
                 if ((find = compare_vars(word, varriables, var_numb)) != -1) {
                     if (varriables[find]->value == 0) {
-                        expr[element_position++] = '0';
+                        expr[0][element_position++] = '0';
                     } else {
-                        expr[element_position++] = '1';
+                        expr[0][element_position++] = '1';
                     }
                 } else if ((find = compare_operands(word, opers)) != -1) {
-                    expr[element_position++] = opers[find][0];
+                    expr[0][element_position++] = opers[find][0];
                 } else if ((find = compare_bool(word)) != -1) {
                     if (find == 0) {
-                        expr[element_position++] = '0';
+                        expr[0][element_position++] = '0';
                     } else {
-                        expr[element_position++] = '1';
+                        expr[0][element_position++] = '1';
                     }
                 } else {
                     free(word);
                     return FALSE;
                 }
-                expr[element_position] = '\0';
+                expr[0][element_position] = '\0';
                 pos = 0;
             }
         }
 
         if (buf[i] == '(') {
-            expr[element_position++] = '(';
-            expr[element_position] = '\0';
+            expr[0][element_position++] = '(';
+            expr[0][element_position] = '\0';
             open++;
-        }
-        if (buf[i] == ')') {
-            expr[element_position++] = ')';
-            expr[element_position] = '\0';
+        } else if (buf[i] == ')') {
+            expr[0][element_position++] = ')';
+            expr[0][element_position] = '\0';
             close++;
         }
+
     } while (buf[i++] != '\0');
 
     if (open != close) {
@@ -334,18 +343,16 @@ Bool get_expr(char *buf, char *expr, var** varriables, size_t var_numb) {
 
     free(word);
     return TRUE;
-}   //  Получает логическое выражение
+}
 
 // ================================
 
-Bool handle_input(char *expression) {
+Bool handle_input(char **expression, size_t *e_len) {
     size_t amount = START_VAR_AMOUNT;
     var** varriables = NULL;
     if ((varriables = get_var_array()) == NULL) {
         return FALSE;
     }
-
-
 
     char *buf = NULL;
     char opers[TOKEN_AMOUNT][sizeof("and")] = {"not", "and", "or", "xor"};
@@ -365,7 +372,7 @@ Bool handle_input(char *expression) {
             }
         }
         if (!get_var(buf, varriables[var_numb], opers)) {
-            if (!get_expr(buf, expression, varriables, var_numb)) {
+            if (!get_expr(buf, expression, e_len, varriables, var_numb)) {
                 free (buf);
                 free_var_array(varriables, amount);
                 return FALSE;
@@ -501,7 +508,8 @@ int main() {
     }
 
 
-    if (!handle_input(expression)) {
+    size_t len = START_EXPR_LENGHT;
+    if (!handle_input(&expression, &len)) {
         printf("[error]");
         free(expression);
         return 0;
