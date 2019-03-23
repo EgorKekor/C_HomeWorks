@@ -6,7 +6,8 @@
 #define     TRUE                1
 #define     FALSE               0
 #define     START_VAR_AMOUNT    1
-#define     START_LENGHT        100
+#define     START_VAR_LENGHT    100
+#define     START_EXPR_LENGHT    100
 #define     STACK_SIZE          100
 #define     MAX_VAR_LEN         50
 #define     TOKEN_AMOUNT        4
@@ -14,7 +15,7 @@
 typedef char Bool;
 
 typedef struct varriable {
-    char name[MAX_VAR_LEN];
+    char *name;
     Bool value;
 } var;
 
@@ -183,10 +184,20 @@ var** get_var_array() {
         for (int i = 0; i < START_VAR_AMOUNT; i++) {
             if ((varriables[i] = (var*)calloc(1, sizeof(var))) == NULL) {
                 for (int j = 0; j < i; j++) {
+                    free(varriables[j]->name);
                     free(varriables[j]);
                 }
                 free(varriables);
                 return NULL;
+            } else {
+                if ((varriables[i]->name = (char*)calloc(START_VAR_LENGHT, sizeof(char))) == NULL) {
+                    for (int j = 0; j < i; j++) {
+                        free(varriables[j]->name);
+                        free(varriables[j]);
+                    }
+                    free(varriables);
+                    return NULL;
+                }
             }
         }
     }
@@ -196,13 +207,8 @@ var** get_var_array() {
 // ================================
 
 Bool free_var_array(var **v, size_t len) {
-    /*size_t i = 0;
-    while (v[i]->end != -1) {
-        free(v[i++]);
-    }
-    free(v[i]);
-    free(v);*/
     for (int i =0; i < len; i++) {
+        free(v[i]->name);
         free(v[i]);
     }
     free(v);
@@ -221,9 +227,18 @@ var** add_vars(var** v, size_t current_amount, size_t add_amount) {
         for (size_t i = current_amount; i < new_amount; i++) {
             if ((v[i] = (var*)calloc(1, sizeof(var))) == NULL) {
                 for (int j = 0; j < i; j++) {
+                    free(v[j]->name);
                     free(v[j]);
                 }
                 return NULL;
+            } else {
+                if ((v[i]->name = (char*)calloc(START_VAR_LENGHT, sizeof(char))) == NULL) {
+                    for (int j = 0; j < i; j++) {
+                        free(v[j]->name);
+                        free(v[j]);
+                    }
+                    return NULL;
+                }
             }
         }
         return v;
@@ -457,7 +472,7 @@ int calculate(char* polish) {
 int main() {
     char *expression = NULL;
 
-    if ((expression = (char*)calloc(START_LENGHT, sizeof(char))) == NULL) {
+    if ((expression = (char*)calloc(START_EXPR_LENGHT, sizeof(char))) == NULL) {
         printf("[error]");
         return 0;
     }
@@ -476,6 +491,8 @@ int main() {
         free(expression);
         return 0;
     }
+    free(expression);
+    expression = NULL;
 
     int value = calculate(polish);
     if (value == 1) {
@@ -483,13 +500,11 @@ int main() {
     } else if (value == 0) {
         printf("False");
     } else {
-        free(expression);
         free(polish);
         printf("[error]");
         return 0;
     }
 
-    free(expression);
     free(polish);
 
 
