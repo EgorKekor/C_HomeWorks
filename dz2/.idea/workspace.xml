@@ -12,7 +12,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6e6ed77d-743e-4010-9d8b-d8529dc85ca8" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/cmake-build-debug/CMakeFiles/dz2.dir/main.c.o" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/main.c" beforeDir="false" afterPath="$PROJECT_DIR$/main.c" afterDir="false" />
     </list>
     <ignored path="$PROJECT_DIR$/cmake-build-debug/" />
@@ -33,16 +32,18 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/main.c">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="339">
-              <caret line="186" column="35" selection-start-line="186" selection-start-column="35" selection-end-line="186" selection-end-column="35" />
+            <state relative-caret-position="146">
+              <caret line="148" column="22" selection-start-line="148" selection-start-column="22" selection-end-line="148" selection-end-column="22" />
               <folding>
                 <element signature="e#20#38#0" expanded="true" />
                 <element signature="e#827#948#0" />
                 <element signature="e#987#1269#0" />
                 <element signature="e#1308#1564#0" />
-                <element signature="e#3135#3407#0" />
                 <element signature="e#3446#3648#0" />
                 <element signature="e#3687#3850#0" />
+                <element signature="e#4327#4881#0" />
+                <element signature="e#4945#5116#0" />
+                <element signature="e#5155#5838#0" />
                 <element signature="e#3889#5880#0" />
                 <element signature="e#7391#7507#0" />
                 <element signature="e#7547#7845#0" />
@@ -133,12 +134,12 @@
       <workItem from="1552720959978" duration="84000" />
       <workItem from="1553176341236" duration="23570000" />
       <workItem from="1553268081971" duration="13483000" />
-      <workItem from="1553330771712" duration="15152000" />
+      <workItem from="1553330771712" duration="16376000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="60563000" />
+    <option name="totallyTimeSpent" value="61787000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-1" y="-1" width="1368" height="744" extended-state="6" />
@@ -149,8 +150,8 @@
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.23624596" />
-      <window_info anchor="bottom" id="Debug" order="3" sideWeight="0.49928263" weight="0.25080907" />
+      <window_info anchor="bottom" id="Run" order="2" weight="0.51941746" />
+      <window_info active="true" anchor="bottom" id="Debug" order="3" sideWeight="0.49928263" visible="true" weight="0.32200646" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
@@ -169,22 +170,50 @@
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="1" />
   </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/main.c</url>
+          <line>168</line>
+          <option name="timeStamp" value="90" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/main.c</url>
+          <line>169</line>
+          <option name="timeStamp" value="91" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/main.c</url>
+          <line>170</line>
+          <option name="timeStamp" value="92" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/main.c</url>
+          <line>171</line>
+          <option name="timeStamp" value="93" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/CMakeLists.txt">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
     <entry file="file://$PROJECT_DIR$/main.c">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="339">
-          <caret line="186" column="35" selection-start-line="186" selection-start-column="35" selection-end-line="186" selection-end-column="35" />
+        <state relative-caret-position="146">
+          <caret line="148" column="22" selection-start-line="148" selection-start-column="22" selection-end-line="148" selection-end-column="22" />
           <folding>
             <element signature="e#20#38#0" expanded="true" />
             <element signature="e#827#948#0" />
             <element signature="e#987#1269#0" />
             <element signature="e#1308#1564#0" />
-            <element signature="e#3135#3407#0" />
             <element signature="e#3446#3648#0" />
             <element signature="e#3687#3850#0" />
+            <element signature="e#4327#4881#0" />
+            <element signature="e#4945#5116#0" />
+            <element signature="e#5155#5838#0" />
             <element signature="e#3889#5880#0" />
             <element signature="e#7391#7507#0" />
             <element signature="e#7547#7845#0" />

@@ -6,8 +6,8 @@
 #define     TRUE                1
 #define     FALSE               0
 #define     START_VAR_AMOUNT    1
-#define     START_VAR_LENGHT    100
-#define     START_EXPR_LENGHT    100
+#define     START_VAR_LENGHT    2
+#define     START_EXPR_LENGHT   100
 #define     STACK_SIZE          100
 #define     MAX_VAR_LEN         50
 #define     TOKEN_AMOUNT        4
@@ -17,6 +17,7 @@ typedef char Bool;
 typedef struct varriable {
     char *name;
     Bool value;
+    size_t len;
 } var;
 
 typedef struct Stack {
@@ -80,6 +81,17 @@ size_t pop_all(Stack *stack, char *polish, size_t *ind) {
 
 // ================================================================
 
+char *increase_string(char* arr, size_t new_len) {
+    char *timeless = NULL;
+    if ((timeless = (char*)realloc(arr, new_len * sizeof(char))) == NULL) {
+        return NULL;
+    } else {
+        return timeless;
+    }
+}
+
+// ================================
+
 Bool get_var(char* buf, var* v, char opers[][sizeof("and")]) {
     int i = 0;
     for (i = 0; buf[i] == ' '; i++) {}                  //  удалилить стартовые пробелы
@@ -133,7 +145,16 @@ Bool get_var(char* buf, var* v, char opers[][sizeof("and")]) {
                     return FALSE;
                 }
             }
-            strncpy(v->name, token_begin, (size_t)(token_end - token_begin));
+            size_t diff = (size_t)(token_end - token_begin);
+            if (v->len < diff) {
+                char *check = NULL;
+                if ((check = increase_string(v->name, diff)) == NULL) {
+                    return FALSE;
+                } else {
+                    v->name = check;
+                }
+            }
+            strncpy(v->name, token_begin, diff);
             v->value = val;
             return TRUE;
         } else return FALSE;
@@ -145,7 +166,7 @@ Bool get_var(char* buf, var* v, char opers[][sizeof("and")]) {
 
 int compare_vars(char* word, var** varriables, size_t var_numb) {
     for (size_t v = 0; v < var_numb; v++) {
-        if (!strcmp(word, varriables[v]->name)) {
+        if (!strncmp(word, varriables[v]->name, varriables[v]->len)) {
             return v;                               //  Вернем номер переменной
         }
     }
@@ -198,6 +219,7 @@ var** get_var_array() {
                     free(varriables);
                     return NULL;
                 }
+                varriables[i]->len = START_VAR_LENGHT;
             }
         }
     }
@@ -239,6 +261,7 @@ var** add_vars(var** v, size_t current_amount, size_t add_amount) {
                     }
                     return NULL;
                 }
+                v[i]->len = START_VAR_LENGHT;
             }
         }
         return v;
