@@ -6,7 +6,7 @@
 
 #IncludeRegexTransform: 
 
-/home/kekor/CLionProjects/C/dz2/main.c
+/home/kekor/C_HomeWorks/dz2/main.c
 stdio.h
 -
 stdlib.h

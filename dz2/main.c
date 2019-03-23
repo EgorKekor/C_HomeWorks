@@ -5,19 +5,21 @@
 
 #define     TRUE                1
 #define     FALSE               0
-#define     START_VAR_AMOUNT    10
+#define     START_VAR_AMOUNT    1
 #define     START_LENGHT        100
+#define     STACK_SIZE          100
+#define     MAX_VAR_LEN         50
 #define     TOKEN_AMOUNT        4
 
 typedef char Bool;
 
 typedef struct varriable {
-    char name[100];                             //  TO_DO: переделать на realloc
+    char name[MAX_VAR_LEN];
     Bool value;
 } var;
 
 typedef struct Stack {
-    char data[100];
+    char data[STACK_SIZE];
     size_t size;
 }Stack;
 
@@ -77,14 +79,14 @@ size_t pop_all(Stack *stack, char *polish, size_t *ind) {
 
 // ================================================================
 
-Bool get_var(char* buf, var* v) {
+Bool get_var(char* buf, var* v, char opers[][sizeof("and")]) {
     int i = 0;
     for (i = 0; buf[i] == ' '; i++) {}                  //  удалилить стартовые пробелы
 
     const char *token_begin = &buf[i];
     char *token_end = NULL;
 
-    for (; buf[i] != '=' && buf[i] != '\n'; i++) {     //  Поверка переменной
+    for (; buf[i] != '=' && buf[i] != '\n' && buf[i] != '\0'; i++) {     //  Поверка переменной
         if ((buf[i] < 'a') || (buf[i] > 'z')) {
             if (buf[i] == ' ') {
                 token_end = &buf[i];
@@ -94,6 +96,8 @@ Bool get_var(char* buf, var* v) {
                 } else {
                     i--;
                 }
+            } else {
+                return FALSE;
             }
         }
     }
@@ -101,6 +105,9 @@ Bool get_var(char* buf, var* v) {
         token_end = &buf[i];
     }
 
+    if ((buf[i] == '\0') || (buf[i] == '\n')) {
+        return FALSE;
+    }
     i++;
     for (; buf[i] == ' ' ; i++) {}
 
@@ -120,6 +127,11 @@ Bool get_var(char* buf, var* v) {
 
         for (; buf[i] == ' '; i++) {}
         if (buf[i] == ';') {
+            for (size_t t = 0; t < TOKEN_AMOUNT; t++) {
+                if (!strncmp(token_begin, opers[t], strlen(opers[t]))) {
+                    return FALSE;
+                }
+            }
             strncpy(v->name, token_begin, (size_t)(token_end - token_begin));
             v->value = val;
             return TRUE;
@@ -153,12 +165,69 @@ int compare_operands(char* word, char opers[][sizeof("and")]) {
 // ================================
 
 int compare_bool(char* word) {
-    if (!strcmp(word, "True")) {
+    if (!strncmp(word, "True", 4)) {
         return 1;
-    } else if (!strcmp(word, "False")) {
+    } else if (!strncmp(word, "False", 5)) {
         return 0;
     }
     return -1;
+}
+
+// ================================
+
+var** get_var_array() {
+    var **varriables = NULL;
+    if ((varriables = (var**)calloc(START_VAR_AMOUNT, sizeof(var*))) == NULL) {      //  TO_DO: переделать на realloc
+        return NULL;
+    } else {
+        for (int i = 0; i < START_VAR_AMOUNT; i++) {
+            if ((varriables[i] = (var*)calloc(1, sizeof(var))) == NULL) {
+                for (int j = 0; j < i; j++) {
+                    free(varriables[j]);
+                }
+                free(varriables);
+                return NULL;
+            }
+        }
+    }
+    return varriables;
+}
+
+// ================================
+
+Bool free_var_array(var **v, size_t len) {
+    /*size_t i = 0;
+    while (v[i]->end != -1) {
+        free(v[i++]);
+    }
+    free(v[i]);
+    free(v);*/
+    for (int i =0; i < len; i++) {
+        free(v[i]);
+    }
+    free(v);
+    return FALSE;
+}
+
+// ================================
+
+var** add_vars(var** v, size_t current_amount, size_t add_amount) {
+    var** timeless = NULL;
+    if ((timeless = (var**)realloc(v, sizeof(var*) * (current_amount + add_amount))) == NULL) {
+        return NULL;
+    } else {
+        v = timeless;
+        size_t new_amount = current_amount + add_amount;
+        for (size_t i = current_amount; i < new_amount; i++) {
+            if ((v[i] = (var*)calloc(1, sizeof(var))) == NULL) {
+                for (int j = 0; j < i; j++) {
+                    free(v[j]);
+                }
+                return NULL;
+            }
+        }
+        return v;
+    }
 }
 
 // ================================
@@ -177,8 +246,8 @@ Bool get_expr(char *buf, char *expr, var** varriables, size_t var_numb) {
 
     size_t i = 0;
     size_t pos = 0;
-    while (buf[i] != '\0') {
-        if ((buf[i] != ' ') && (buf[i] != '(') && (buf[i] != ')') && (buf[i] != '\n')) {
+    do {
+        if ((buf[i] != ' ') && (buf[i] != '(') && (buf[i] != ')') && (buf[i] != '\0') && (buf[i] != '\n')) {
             word[pos] = buf[i];
             word[pos + 1] = '\0';
             pos++;
@@ -218,8 +287,7 @@ Bool get_expr(char *buf, char *expr, var** varriables, size_t var_numb) {
             expr[element_position] = '\0';
             close++;
         }
-        i++;
-    }
+    } while (buf[i++] != '\0');
 
     if (open != close) {
         free(word);
@@ -232,58 +300,50 @@ Bool get_expr(char *buf, char *expr, var** varriables, size_t var_numb) {
 
 // ================================
 
-Bool handle_input(char *expression, var** varriables, size_t *var_amount) {
+Bool handle_input(char *expression) {
+    size_t amount = START_VAR_AMOUNT;
+    var** varriables = NULL;
+    if ((varriables = get_var_array()) == NULL) {
+        return FALSE;
+    }
+
+
+
     char *buf = NULL;
+    char opers[TOKEN_AMOUNT][sizeof("and")] = {"not", "and", "or", "xor"};
 
     size_t var_numb = 0;
     size_t mem_len = 0;
     while (getline(&buf, &mem_len, stdin) != -1) {
-        if (!get_var(buf, varriables[var_numb])) {
+        if (var_numb == amount) {
+            var **timeless = NULL;
+            if ((timeless = add_vars(varriables, var_numb, START_VAR_AMOUNT)) == NULL) {
+                free (buf);
+                free_var_array(varriables, amount);
+                return FALSE;
+            } else {
+                amount += START_VAR_AMOUNT;
+                varriables = timeless;
+            }
+        }
+        if (!get_var(buf, varriables[var_numb], opers)) {
             if (!get_expr(buf, expression, varriables, var_numb)) {
                 free (buf);
+                free_var_array(varriables, amount);
                 return FALSE;
             } else {
                 free (buf);
+                free_var_array(varriables, amount);
                 return TRUE;
             }
         } else {
             var_numb++;
-            *var_amount = var_numb;
             free(buf);
             buf = NULL;
         }
     }
+    free_var_array(varriables, amount);
     return TRUE;
-}
-
-// ================================
-
-var** get_var_array() {
-    var **varriables = NULL;
-    if ((varriables = (var**)calloc(START_VAR_AMOUNT, sizeof(var*))) == NULL) {      //  TO_DO: переделать на realloc
-        return NULL;
-    } else {
-        for (int i = 0; i < START_VAR_AMOUNT; i++) {
-            if ((varriables[i] = (var*)calloc(1, sizeof(var))) == NULL) {
-                for (int j = 0; j < i; j++) {
-                    free(varriables[j]);
-                }
-                free(varriables);
-                return NULL;
-            }
-        }
-    }
-    return varriables;
-}
-
-// ================================
-
-var** delete_var_array(var **v, size_t len) {
-    for (int i = 0; i < len; i++) {
-        free(v[i]);
-    }
-    free(v);
-    return NULL;
 }
 
 // ================================
@@ -369,14 +429,22 @@ int calculate(char* polish) {
             i++;
         }
 
+
         if (polish[i] == 'n') {
             digits[d - 1] = !digits[d - 1];
-        } else if (polish[i] == 'a') {
+        } else if (d < 2) {
+            return -1;
+        } else if(polish[i] == 'a') {
             d--;
             digits[d - 1] &= digits[d];
         } else if (polish[i] == 'o') {
             d--;
             digits[d - 1] |= digits[d];
+        } else if (polish[i] == 'x') {
+            d--;
+            digits[d - 1] ^= digits[d];
+        } else {
+            return -1;
         }
 
         i++;
@@ -388,29 +456,24 @@ int calculate(char* polish) {
 
 int main() {
     char *expression = NULL;
-    var **varriables = NULL;
 
     if ((expression = (char*)calloc(START_LENGHT, sizeof(char))) == NULL) {
         printf("[error]");
         return 0;
     }
 
-    if ((varriables = get_var_array()) == NULL) {
-        free(expression);
+
+    if (!handle_input(expression)) {
         printf("[error]");
+        free(expression);
         return 0;
     }
 
-
-    size_t amount = 0;
-    if (!handle_input(expression, varriables, &amount)) {
-        printf("[error]");                                  //  TO_DO: добавить free
-        return 0;
-    }
 
     char* polish = NULL;
     if ((polish = get_polish(expression)) == NULL) {
         printf("[error]");
+        free(expression);
         return 0;
     }
 
@@ -420,16 +483,14 @@ int main() {
     } else if (value == 0) {
         printf("False");
     } else {
+        free(expression);
+        free(polish);
         printf("[error]");
         return 0;
     }
 
-    //printf("%s\n", expression);
-    //printf("%s\n", polish);
-
     free(expression);
     free(polish);
-    delete_var_array(varriables, START_VAR_AMOUNT);
 
 
     return 0;
