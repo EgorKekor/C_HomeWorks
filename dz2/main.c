@@ -1,6 +1,6 @@
 /*
  *
-RUNID = 1710 Безруков Егор АПО-12
+RUNID = 2136 Безруков Егор АПО-12
  *
 Требуется написать программу, которая способна вычислять логическе выражения.
 Допустимые выражения чувствительны к регистру и могут содержать:
@@ -30,7 +30,7 @@ RUNID = 1710 Безруков Егор АПО-12
 #define     START_VAR_AMOUNT    1
 #define     START_VAR_LENGHT    10
 #define     START_EXPR_LENGHT   20
-#define     STACK_SIZE          100
+#define     START_STACK_SIZE    10
 #define     TOKEN_AMOUNT        4
 
 typedef char Bool;
@@ -42,15 +42,57 @@ typedef struct varriable {
 } var;
 
 typedef struct Stack {
-    char data[STACK_SIZE];
+    char *data;
     size_t size;
+    size_t max_size;
 }Stack;
+
+
+// ================================================================
+
+char *increase_string(char* arr, size_t new_len) {
+    char *timeless = NULL;
+    if ((timeless = (char*)realloc(arr, new_len * sizeof(char))) == NULL) {
+        return NULL;
+    } else {
+        return timeless;
+    }
+}
+
+// ================================================================
+
+Stack* get_stack(size_t len) {
+    Stack *stack;
+    if ((stack = (Stack*)calloc(1, sizeof(struct Stack))) == NULL) {
+        return NULL;
+    }
+
+    if ((stack->data = (char*)calloc(len, sizeof(char))) == NULL) {
+        free(stack);
+        return NULL;
+    } else {
+        stack->max_size = len;
+        stack->size = 0;
+        return stack;
+    }
+}
 
 // ================================
 
-void push(Stack *stack, const char value) {
+Bool push(Stack *stack, const char value) {
+    if (stack->size == stack->max_size) {
+        char *check = NULL;
+        if ((check = increase_string(stack->data, stack->max_size * 2)) == NULL) {
+            free(stack->data);
+            return FALSE;
+        } else {
+            stack->max_size *= 2;
+            stack->data = check;
+        }
+    }
     stack->data[stack->size] = value;
     stack->size++;
+    return TRUE;
 }
 
 // ================================
@@ -98,17 +140,6 @@ size_t pop_all(Stack *stack, char *polish, size_t *ind) {
     }
     polish[*ind] = '\0';
     return (*ind - start);
-}
-
-// ================================================================
-
-char *increase_string(char* arr, size_t new_len) {
-    char *timeless = NULL;
-    if ((timeless = (char*)realloc(arr, new_len * sizeof(char))) == NULL) {
-        return NULL;
-    } else {
-        return timeless;
-    }
 }
 
 // ================================
@@ -440,12 +471,14 @@ size_t get_priorety(char ch) {
 
 char* get_polish(char* expr) {
     char* polish = NULL;
-    if ((polish = (char*)calloc(51, sizeof(char))) == NULL) {
+    if ((polish = (char*)calloc(strlen(expr) + 1, sizeof(char))) == NULL) {
         return NULL;
     }
 
-    Stack operators;
-    operators.size = 0;
+    Stack *operators;
+    if ((operators = get_stack(START_STACK_SIZE)) == NULL) {
+        return NULL;
+    }
 
     size_t p = 0;
     size_t i = 0;
@@ -453,20 +486,24 @@ char* get_polish(char* expr) {
         if (is_operand(expr[i])) {
             polish[p++] = expr[i];
         } else if (expr[i] == '(') {
-            push(&operators, expr[i]);
+            if (!push(operators, expr[i]))
+                return NULL;
         } else if (expr[i] == ')') {
-            pop_brackets(&operators, polish, &p);
+            pop_brackets(operators, polish, &p);
         } else {
             size_t prior = get_priorety(expr[i]);
             char last;
-            if ((last = peek(&operators)) == -1) {
-                push(&operators, expr[i]);
+            if ((last = peek(operators)) == -1) {
+                if (!push(operators, expr[i]))
+                    return NULL;
             } else {
                 if (prior > get_priorety(last)) {
-                    push(&operators, expr[i]);
+                    if (!push(operators, expr[i]))
+                        return NULL;
                 } else {
-                    last = pop(&operators);
-                    push(&operators, expr[i]);
+                    last = pop(operators);
+                    if (!push(operators, expr[i]))
+                        return NULL;
                     polish[p++] = last;
                 }
             }
@@ -474,18 +511,24 @@ char* get_polish(char* expr) {
         i++;
         polish[p] = '\0';
     }
-    pop_all(&operators, polish, &p);
+    pop_all(operators, polish, &p);
+    free(operators->data);
+    free(operators);
     return polish;
 }
 
 // ================================
 
 int calculate(char* polish) {
-    int digits[20];
+    size_t max_operands = strlen(polish) / 2 + 1;
+    int digits[max_operands];
     size_t d = 0;
     size_t i = 0;
     while (polish[i] != '\0') {
         while (is_operand(polish[i])) {
+            if (d == max_operands) {
+                return -1;
+            }
             if (polish[i] == '1') {
                 digits[d] = 1;
             } else {
